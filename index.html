@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#064e3b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Jadwal Sholat" />
+  <title>Jadwal Sholat, Puasa, Kalender Hijriah & Buku Ramadhan</title>
+  <link id="pwaManifestLink" rel="manifest" href="manifest.json" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            arabic: ['Amiri', 'Traditional Arabic', 'serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap');
+    body { -webkit-tap-highlight-color: transparent; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.35); border-radius: 9999px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen pb-24 lg:pb-8 transition-colors duration-200">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow">
+          ☪
+        </div>
+        <div>
+          <h1 class="font-extrabold text-base sm:text-lg leading-tight text-emerald-700 dark:text-emerald-400">
+            Jadwal Sholat & Buku Ramadhan
+          </h1>
+          <p id="headerLocationLabel" class="text-xs text-slate-500 dark:text-slate-400">
+            Kab. Bekasi, Jawa Barat
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Direct Install App Button (triggers native PWA prompt when available) -->
+        <button id="btnInstallApp" type="button"
+          class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">
+          <span>⬇</span>
+          <span>Instal Aplikasi</span>
+        </button>
+
+        <button id="btnOpenInstallHelp" type="button"
+          class="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-semibold hover:bg-emerald-500/20 transition">
+          📲 Pasang ke Layar Utama
+        </button>
+
+        <button id="btnToggleTheme" type="button" title="Ganti Tema"
+          class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+          🌓
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="max-w-7xl mx-auto px-4 pt-5 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="hidden lg:block lg:col-span-3 space-y-4">
+      <nav class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 space-y-1.5 shadow-sm">
+        <button data-nav="dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold bg-emerald-600 text-white">
+          <span>🕌</span><span>Dashboard & Jadwal</span>
+        </button>
+        <button data-nav="calendar" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span>📅</span><span>Kalender Hijriah</span>
+        </button>
+        <button data-nav="ramadhan" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span>📖</span><span>Buku Ramadhan</span>
+        </button>
+        <button data-nav="tasbih" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span>📿</span><span>Tasbih & Imsakiyah</span>
+        </button>
+      </nav>
+
+      <!-- REGION & HILAL PANEL -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3 shadow-sm">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Pengaturan Daerah</h2>
+        <input id="regionSearchInput" type="text" placeholder="Cari kota / kabupaten..."
+          class="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        <select id="regionSelect"
+          class="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </select>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btnDetectGPS" type="button"
+            class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
+            📍 GPS Otomatis
+          </button>
+          <button id="btnOpenManualCoord" type="button"
+            class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition">
+            ✏️ Manual
+          </button>
+        </div>
+        <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <span class="text-xs text-slate-500 dark:text-slate-400">Koreksi Hilal (Hari)</span>
+          <select id="hilalOffsetSelect" class="px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <option value="-2">-2 Hari</option>
+            <option value="-1">-1 Hari</option>
+            <option value="0" selected>0 (Standar)</option>
+            <option value="1">+1 Hari</option>
+            <option value="2">+2 Hari</option>
+          </select>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="lg:col-span-9 space-y-6">
+
+      <!-- MOBILE REGION BAR -->
+      <div class="lg:hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3.5 space-y-2.5 shadow-sm">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">📍 Wilayah Jadwal Sholat</span>
+          <div class="flex items-center gap-1.5">
+            <button id="btnDetectGPSMobile" type="button" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-semibold">GPS</button>
+            <button id="btnOpenManualCoordMobile" type="button" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold">Manual</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input id="regionSearchInputMobile" type="text" placeholder="Ketik nama kota/kabupaten..."
+            class="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700" />
+          <select id="regionSelectMobile"
+            class="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          </select>
+        </div>
+      </div>
+
+      <!-- SECTION 1: DASHBOARD -->
+      <section id="section-dashboard" class="app-section space-y-5">
+        <!-- Hero Clock & Next Prayer -->
+        <div class="rounded-3xl bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-900 text-white p-6 shadow-lg">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p id="masehiDateText" class="text-xs sm:text-sm text-emerald-200 font-medium">-</p>
+              <p id="hijriDateText" class="text-base sm:text-lg font-bold text-amber-300 mt-0.5">-</p>
+              <div id="liveClockText" class="text-4xl sm:text-5xl font-extrabold tracking-tight mt-2 font-mono">00:00:00</div>
+            </div>
+            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 sm:min-w-[230px] border border-white/10">
+              <p class="text-xs uppercase tracking-wider text-emerald-200">Menuju Waktu Berikutnya</p>
+              <p id="nextPrayerName" class="text-xl font-extrabold text-white mt-0.5">-</p>
+              <p id="nextPrayerCountdown" class="text-2xl font-mono font-bold text-amber-300 mt-1">--:--:--</p>
+              <p id="fastingStatusBadge" class="mt-2 inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/30 text-emerald-100">
+                Status Puasa Hari Ini
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 Prayer Cards -->
+        <div id="prayerCardsGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+
+        <!-- Niat & Doa Puasa -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-sm">
+          <h3 class="font-bold text-base text-emerald-700 dark:text-emerald-400">🤲 Niat Puasa & Doa Berbuka</h3>
+          <div id="niatDoaContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: KALENDER HIJRIAH -->
+      <section id="section-calendar" class="app-section hidden space-y-5">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 id="calendarMonthTitle" class="text-lg font-extrabold text-emerald-700 dark:text-emerald-400">Kalender</h2>
+              <p id="calendarHijriSubtitle" class="text-xs text-slate-500 dark:text-slate-400">-</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="btnPrevMonth" type="button" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700">◀ Seb</button>
+              <button id="btnTodayMonth" type="button" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold">Hari Ini</button>
+              <button id="btnNextMonth" type="button" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700">Ber ▶</button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-3 text-[11px]">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Ramadhan</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Puasa Senin-Kamis</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> Ayyamul Bidh (13-15 H)</span>
+          </div>
+
+          <div class="grid grid-cols-7 gap-1.5 text-center text-xs font-bold text-slate-400">
+            <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
+          </div>
+          <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1.5"></div>
+        </div>
+
+        <div id="selectedDateDetailCard" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+          <h3 class="font-bold text-sm text-emerald-700 dark:text-emerald-400 mb-2">Detail Jadwal Tanggal Terpilih</h3>
+          <p id="selectedDateDetailText" class="text-xs text-slate-600 dark:text-slate-300">Klik salah satu tanggal pada kalender di atas untuk melihat jadwal sholat & status puasanya.</p>
+        </div>
+      </section>
+
+      <!-- SECTION 3: BUKU RAMADHAN SELAMANYA -->
+      <section id="section-ramadhan" class="app-section hidden space-y-5">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-extrabold text-emerald-700 dark:text-emerald-400">📖 Buku Ramadhan (Selamanya)</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Tersimpan otomatis di perangkat untuk setiap tahun Hijriah</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <select id="hijriYearSelect" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></select>
+              <button id="btnAddHijriYear" type="button" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold">+ Tahun Baru</button>
+              <button id="btnExportBackup" type="button" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold">Ekspor JSON</button>
+              <label class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold cursor-pointer">
+                Impor JSON
+                <input id="inputImportBackup" type="file" accept=".json" class="hidden" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Day 1-30 Selector -->
+          <div>
+            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Pilih Hari Ramadhan (1 – 30):</p>
+            <div id="ramadhanDayPills" class="grid grid-cols-6 sm:grid-cols-10 gap-1.5"></div>
+          </div>
+
+          <!-- Checklist Ibadah -->
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 id="ramadhanActiveDayTitle" class="font-bold text-sm text-emerald-700 dark:text-emerald-400">Hari ke-1 Ramadhan</h3>
+              <span id="ramadhanDayScoreBadge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">0 / 8 Amalan</span>
+            </div>
+            <div id="ramadhanChecklistGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+          </div>
+
+          <!-- Tadarus Al-Qur'an Lengkap (Juz 1-30, 114 Surat, Ayat) -->
+          <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+            <h3 class="font-bold text-sm text-emerald-700 dark:text-emerald-400">📚 Catatan Tadarus Al-Qur'an (Juz, Surat & Ayat)</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+              <div class="sm:col-span-3">
+                <label class="block text-[11px] text-slate-500 mb-1">Filter Juz</label>
+                <select id="tadarusJuzSelect" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></select>
+              </div>
+              <div class="sm:col-span-5">
+                <label class="block text-[11px] text-slate-500 mb-1">Pilih Surat (1–114)</label>
+                <select id="tadarusSurahSelect" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></select>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[11px] text-slate-500 mb-1">Ayat Mulai</label>
+                <input id="tadarusAyatStart" type="number" min="1" value="1" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700" />
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[11px] text-slate-500 mb-1">Ayat Selesai</label>
+                <input id="tadarusAyatEnd" type="number" min="1" value="7" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700" />
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span id="tadarusSurahInfo" class="text-[11px] text-slate-500 dark:text-slate-400">Al-Fatihah (7 Ayat)</span>
+              <button id="btnAddTadarusLog" type="button" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">
+                + Tambah Log Tadarus
+              </button>
+            </div>
+            <div id="tadarusLogList" class="space-y-1.5"></div>
+          </div>
+
+          <!-- Catatan Kultum / Hikmah -->
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Catatan Kultum / Ceramah / Target Harian</label>
+            <textarea id="ramadhanNoteInput" rows="2" placeholder="Contoh: Kajian Subuh tentang keutamaan sedekah..."
+              class="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+          </div>
+        </div>
+
+        <!-- Tabel Rekap 30 Hari -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-sm text-emerald-700 dark:text-emerald-400">📊 Rekap Ibadah 30 Hari</h3>
+            <button id="btnCopyRecap" type="button" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700">
+              📋 Salin Rekap
+            </button>
+          </div>
+          <div class="overflow-x-auto custom-scroll">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                  <th class="py-2 px-2">Hari</th>
+                  <th class="py-2 px-2">Capaian</th>
+                  <th class="py-2 px-2">Tadarus Al-Qur'an</th>
+                  <th class="py-2 px-2">Catatan</th>
+                </tr>
+              </thead>
+              <tbody id="ramadhanRecapTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: TASBIH & IMSAKIYAH -->
+      <section id="section-tasbih" class="app-section hidden space-y-5">
+        <!-- Tasbih Digital -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm text-center space-y-4">
+          <h2 class="text-lg font-extrabold text-emerald-700 dark:text-emerald-400">📿 Tasbih & Dzikir Digital</h2>
+          <div class="flex flex-wrap justify-center gap-2">
+            <select id="tasbihPhraseSelect" class="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <option value="Subhanallah (سُبْحَانَ اللَّهِ)">Subhanallah (33x)</option>
+              <option value="Alhamdulillah (الْحَمْدُ لِلَّهِ)">Alhamdulillah (33x)</option>
+              <option value="Allahu Akbar (اللَّهُ أَكْبَرُ)">Allahu Akbar (33x)</option>
+              <option value="Astaghfirullah (أَسْتَغْفِرُ اللَّهَ)">Astaghfirullah (100x)</option>
+              <option value="La ilaha illallah (لَا إِلَٰهَ إِلَّا اللَّهُ)">La ilaha illallah (100x)</option>
+            </select>
+            <select id="tasbihTargetSelect" class="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <option value="33">Target: 33</option>
+              <option value="99">Target: 99</option>
+              <option value="100">Target: 100</option>
+              <option value="1000">Target: 1000</option>
+            </select>
+          </div>
+
+          <div class="py-2">
+            <p id="tasbihActivePhrase" class="text-sm font-bold text-slate-600 dark:text-slate-300">Subhanallah (سُبْحَانَ اللَّهِ)</p>
+            <div id="tasbihCounterDisplay" class="text-6xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400 my-3">0</div>
+            <p id="tasbihProgressText" class="text-xs text-slate-400">0 / 33 hitungan</p>
+          </div>
+
+          <div class="flex items-center justify-center gap-3">
+            <button id="btnTasbihReset" type="button" class="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700">
+              ↺ Reset
+            </button>
+            <button id="btnTasbihIncrement" type="button"
+              class="px-10 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-base font-extrabold shadow-lg transition">
+              + Hitung Dzikir
+            </button>
+          </div>
+        </div>
+
+        <!-- Jadwal Imsakiyah 1 Bulan -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="font-bold text-base text-emerald-700 dark:text-emerald-400">🗓️ Jadwal Imsakiyah & Sholat 1 Bulan</h3>
+              <p id="imsakiyahSubtitle" class="text-xs text-slate-500 dark:text-slate-400">-</p>
+            </div>
+            <button id="btnPrintImsakiyah" type="button" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700">
+              🖨️ Cetak / Simpan PDF
+            </button>
+          </div>
+          <div class="overflow-x-auto custom-scroll">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                  <th class="py-2 px-2">Tanggal</th>
+                  <th class="py-2 px-2">Hijriah</th>
+                  <th class="py-2 px-2 text-amber-500">Imsak</th>
+                  <th class="py-2 px-2">Subuh</th>
+                  <th class="py-2 px-2">Dzuhur</th>
+                  <th class="py-2 px-2">Ashar</th>
+                  <th class="py-2 px-2 text-emerald-500">Maghrib</th>
+                  <th class="py-2 px-2">Isya</th>
+                </tr>
+              </thead>
+              <tbody id="imsakiyahTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MOBILE BOTTOM NAVIGATION -->
+  <nav class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 grid grid-cols-4 py-1.5 px-1">
+    <button data-nav="dashboard" class="nav-btn flex flex-col items-center py-1 rounded-xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+      <span class="text-base">🕌</span><span>Jadwal</span>
+    </button>
+    <button data-nav="calendar" class="nav-btn flex flex-col items-center py-1 rounded-xl text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+      <span class="text-base">📅</span><span>Kalender</span>
+    </button>
+    <button data-nav="ramadhan" class="nav-btn flex flex-col items-center py-1 rounded-xl text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+      <span class="text-base">📖</span><span>Buku 30H</span>
+    </button>
+    <button data-nav="tasbih" class="nav-btn flex flex-col items-center py-1 rounded-xl text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+      <span class="text-base">📿</span><span>Tasbih</span>
+    </button>
+  </nav>
+
+  <!-- MODAL: MANUAL COORDINATES -->
+  <div id="manualCoordModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-5 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base">Input Daerah & Koordinat Manual</h3>
+        <button id="btnCloseManualModal" type="button" class="text-slate-400 hover:text-slate-200 text-lg">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-500 mb-1">Nama Daerah / Kota</label>
+          <input id="manualCityName" type="text" placeholder="Contoh: Cikarang Utara, Bekasi" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-500 mb-1">Latitude (Lintang)</label>
+            <input id="manualLat" type="number" step="any" placeholder="-6.2615" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700" />
+          </div>
+          <div>
+            <label class="block text-slate-500 mb-1">Longitude (Bujur)</label>
+            <input id="manualLng" type="number" step="any" placeholder="107.1528" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-500 mb-1">Zona Waktu (WIB/WITA/WIT)</label>
+          <select id="manualTz" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <option value="7">WIB (UTC+7)</option>
+            <option value="8">WITA (UTC+8)</option>
+            <option value="9">WIT (UTC+9)</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button id="btnCancelManualModal" type="button" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold">Batal</button>
+        <button id="btnSaveManualCoord" type="button" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">Simpan Daerah</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INSTALL PWA GUIDE -->
+  <div id="installHelpModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-5 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base text-emerald-600 dark:text-emerald-400">📲 Instal Aplikasi ke HP & Desktop</h3>
+        <button id="btnCloseInstallHelp" type="button" class="text-slate-400 hover:text-slate-200 text-lg">✕</button>
+      </div>
+      <div class="space-y-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div id="nativeInstallStatusBox" class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
+          Jika tombol hijau <b>"Instal Aplikasi"</b> di bagian atas muncul, langsung klik tombol tersebut untuk memasang aplikasi dalam 1 ketukan.
+        </div>
+        <div>
+          <p class="font-bold text-slate-800 dark:text-slate-100">1. Cara Pasang di HP Android (Chrome / POCO):</p>
+          <p>Ketuk ikon <b>titik tiga (⋮)</b> di pojok kanan atas browser &rarr; pilih <b>Tambahkan ke layar utama</b> (<i>Add to Home screen</i>) &rarr; ketuk <b>Instal</b>.</p>
+        </div>
+        <div>
+          <p class="font-bold text-slate-800 dark:text-slate-100">2. Cara Pasang di Laptop Windows (Chrome / Edge):</p>
+          <p>Klik ikon <b>Instal Aplikasi (layar dengan panah)</b> di sisi kanan bilah alamat browser, atau klik <b>⋮ &rarr; Simpan dan bagikan &rarr; Instal halaman sebagai aplikasi</b>.</p>
+        </div>
+        <div>
+          <p class="font-bold text-slate-800 dark:text-slate-100">3. Jalankan Langsung dari Paket Installer ZIP:</p>
+          <p>Ekstrak file ZIP installer, lalu klik ganda <b>Jalankan_Aplikasi_Windows.bat</b> di laptop Windows untuk otomatis membuka server lokal dan memunculkan tombol instalasi resmi.</p>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button id="btnOkInstallHelp" type="button" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">Mengerti</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toastBox" class="fixed bottom-20 lg:bottom-6 right-4 z-50 hidden px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-emerald-600 text-xs font-semibold shadow-lg"></div>
+
+  <script>
+    // =========================================================================
+    // 1. PWA MANIFEST & SERVICE WORKER BOOTSTRAP (WORKS BOTH HOSTED & INLINE)
+    // =========================================================================
+    (function setupPWA() {
+      try {
+        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#059669"/><circle cx="256" cy="256" r="145" fill="#fbbf24"/><circle cx="298" cy="224" r="120" fill="#059669"/></svg>`;
+        const iconUrl = 'data:image/svg+xml;base64,' + btoa(iconSvg);
+        const manifestObj = {
+          name: 'Jadwal Sholat, Puasa & Buku Ramadhan',
+          short_name: 'Jadwal Sholat',
+          description: 'Aplikasi Jadwal Sholat Kemenag RI, Kalender Hijriah, Buku Ramadhan Selamanya & Tasbih Digital',
+          start_url: location.protocol.startsWith('http') ? './' : '.',
+          display: 'standalone',
+          background_color: '#020617',
+          theme_color: '#059669',
+          icons: [
+            { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+            { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+          ]
+        };
+        if (location.protocol === 'blob:' || location.protocol === 'data:' || location.protocol === 'file:') {
+          const blob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+          const linkEl = document.getElementById('pwaManifestLink');
+          if (linkEl) linkEl.href = URL.createObjectURL(blob);
+        }
+        if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+      } catch (e) {}
+    })();
+
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btn = document.getElementById('btnInstallApp');
+      if (btn) {
+        btn.classList.remove('hidden');
+        btn.classList.add('inline-flex');
+      }
+    });
+
+    // =========================================================================
+    // 2. DATA DAERAH INDONESIA, AL-QUR'AN (30 JUZ & 114 SURAT) & KONSTANTA
+    // =========================================================================
+    const REGIONS = [
+      { name: 'Kab. Bekasi, Jawa Barat', lat: -6.2615, lng: 107.1528, tz: 7 },
+      { name: 'Kota Bekasi, Jawa Barat', lat: -6.2383, lng: 106.9756, tz: 7 },
+      { name: 'DKI Jakarta', lat: -6.2088, lng: 106.8456, tz: 7 },
+      { name: 'Kota Bogor, Jawa Barat', lat: -6.5971, lng: 106.8060, tz: 7 },
+      { name: 'Kota Depok, Jawa Barat', lat: -6.4025, lng: 106.7942, tz: 7 },
+      { name: 'Kota Tangerang, Banten', lat: -6.1783, lng: 106.6319, tz: 7 },
+      { name: 'Kota Tangerang Selatan, Banten', lat: -6.2886, lng: 106.7179, tz: 7 },
+      { name: 'Kab. Karawang, Jawa Barat', lat: -6.3227, lng: 107.3376, tz: 7 },
+      { name: 'Kota Bandung, Jawa Barat', lat: -6.9175, lng: 107.6191, tz: 7 },
+      { name: 'Kota Cimahi, Jawa Barat', lat: -6.8722, lng: 107.5425, tz: 7 },
+      { name: 'Kota Cirebon, Jawa Barat', lat: -6.7320, lng: 108.5523, tz: 7 },
+      { name: 'Kota Tasikmalaya, Jawa Barat', lat: -7.3274, lng: 108.2207, tz: 7 },
+      { name: 'Kota Sukabumi, Jawa Barat', lat: -6.9277, lng: 106.9300, tz: 7 },
+      { name: 'Kab. Garut, Jawa Barat', lat: -7.2279, lng: 107.9087, tz: 7 },
+      { name: 'Kab. Subang, Jawa Barat', lat: -6.5715, lng: 107.7587, tz: 7 },
+      { name: 'Kab. Purwakarta, Jawa Barat', lat: -6.5569, lng: 107.4433, tz: 7 },
+      { name: 'Kota Serang, Banten', lat: -6.1104, lng: 106.1640, tz: 7 },
+      { name: 'Kota Semarang, Jawa Tengah', lat: -6.9667, lng: 110.4167, tz: 7 },
+      { name: 'Kota Surakarta (Solo), Jawa Tengah', lat: -7.5755, lng: 110.8243, tz: 7 },
+      { name: 'Kota Magelang, Jawa Tengah', lat: -7.4797, lng: 110.2177, tz: 7 },
+      { name: 'Kab. Banyumas (Purwokerto), Jawa Tengah', lat: -7.4314, lng: 109.2478, tz: 7 },
+      { name: 'Kota Tegal, Jawa Tengah', lat: -6.8694, lng: 109.1402, tz: 7 },
+      { name: 'Kota Pekalongan, Jawa Tengah', lat: -6.8886, lng: 109.6753, tz: 7 },
+      { name: 'DI Yogyakarta', lat: -7.7956, lng: 110.3695, tz: 7 },
+      { name: 'Kota Surabaya, Jawa Timur', lat: -7.2575, lng: 112.7521, tz: 7 },
+      { name: 'Kota Malang, Jawa Timur', lat: -7.9666, lng: 112.6326, tz: 7 },
+      { name: 'Kota Kediri, Jawa Timur', lat: -7.8480, lng: 112.0178, tz: 7 },
+      { name: 'Kab. Sidoarjo, Jawa Timur', lat: -7.4478, lng: 112.7183, tz: 7 },
+      { name: 'Kab. Gresik, Jawa Timur', lat: -7.1566, lng: 112.6555, tz: 7 },
+      { name: 'Kab. Banyuwangi, Jawa Timur', lat: -8.2192, lng: 114.3691, tz: 7 },
+      { name: 'Kab. Jember, Jawa Timur', lat: -8.1845, lng: 113.6681, tz: 7 },
+      { name: 'Kota Banda Aceh, Aceh', lat: 5.5483, lng: 95.3238, tz: 7 },
+      { name: 'Kota Medan, Sumatera Utara', lat: 3.5952, lng: 98.6722, tz: 7 },
+      { name: 'Kota Padang, Sumatera Barat', lat: -0.9471, lng: 100.4172, tz: 7 },
+      { name: 'Kota Pekanbaru, Riau', lat: 0.5071, lng: 101.4478, tz: 7 },
+      { name: 'Kota Batam, Kepulauan Riau', lat: 1.0456, lng: 104.0305, tz: 7 },
+      { name: 'Kota Jambi, Jambi', lat: -1.6101, lng: 103.6131, tz: 7 },
+      { name: 'Kota Palembang, Sumatera Selatan', lat: -2.9761, lng: 104.7754, tz: 7 },
+      { name: 'Kota Bengkulu, Bengkulu', lat: -3.7928, lng: 102.2608, tz: 7 },
+      { name: 'Kota Bandar Lampung, Lampung', lat: -5.4292, lng: 105.2610, tz: 7 },
+      { name: 'Kota Pangkalpinang, Bangka Belitung', lat: -2.1316, lng: 106.1169, tz: 7 },
+      { name: 'Kota Pontianak, Kalimantan Barat', lat: -0.0263, lng: 109.3425, tz: 7 },
+      { name: 'Kota Palangka Raya, Kalimantan Tengah', lat: -2.2136, lng: 113.9108, tz: 7 },
+      { name: 'Kota Denpasar, Bali', lat: -8.6705, lng: 115.2126, tz: 8 },
+      { name: 'Kota Mataram, NTB', lat: -8.5833, lng: 116.1167, tz: 8 },
+      { name: 'Kota Kupang, NTT', lat: -10.1772, lng: 123.6070, tz: 8 },
+      { name: 'Kota Banjarmasin, Kalimantan Selatan', lat: -3.3186, lng: 114.5944, tz: 8 },
+      { name: 'Kota Samarinda, Kalimantan Timur', lat: -0.5022, lng: 117.1536, tz: 8 },
+      { name: 'Kota Balikpapan, Kalimantan Timur', lat: -1.2379, lng: 116.8529, tz: 8 },
+      { name: 'Kota Tarakan, Kalimantan Utara', lat: 3.3274, lng: 117.5785, tz: 8 },
+      { name: 'Kota Makassar, Sulawesi Selatan', lat: -5.1477, lng: 119.4327, tz: 8 },
+      { name: 'Kota Palu, Sulawesi Tengah', lat: -0.9003, lng: 119.8780, tz: 8 },
+      { name: 'Kota Kendari, Sulawesi Tenggara', lat: -3.9985, lng: 122.5129, tz: 8 },
+      { name: 'Kota Gorontalo, Gorontalo', lat: 0.5435, lng: 123.0568, tz: 8 },
+      { name: 'Kota Manado, Sulawesi Utara', lat: 1.4748, lng: 124.8421, tz: 8 },
+      { name: 'Kota Mamuju, Sulawesi Barat', lat: -2.6748, lng: 118.8885, tz: 8 },
+      { name: 'Kota Ambon, Maluku', lat: -3.6954, lng: 128.1814, tz: 9 },
+      { name: 'Kota Ternate, Maluku Utara', lat: 0.7893, lng: 127.3771, tz: 9 },
+      { name: 'Kota Jayapura, Papua', lat: -2.5916, lng: 140.6690, tz: 9 },
+      { name: 'Kota Sorong, Papua Barat Daya', lat: -0.8762, lng: 131.2558, tz: 9 }
+    ];
+
+    const SURAHS = [
+      [1,'Al-Fatihah','الفاتحة',7],[2,'Al-Baqarah','البقرة',286],[3,'Ali Imran','آل عمران',200],[4,'An-Nisa','النساء',176],
+      [5,'Al-Ma'idah','المائدة',120],[6,'Al-An'am','الأنعام',165],[7,'Al-A'raf','الأعراف',206],[8,'Al-Anfal','الأنفال',75],
+      [9,'At-Taubah','التوبة',129],[10,'Yunus','يونس',109],[11,'Hud','هود',123],[12,'Yusuf','يوسف',111],
+      [13,'Ar-Ra'd','الرعد',43],[14,'Ibrahim','إبراهيم',52],[15,'Al-Hijr','الحجر',99],[16,'An-Nahl','النحل',128],
+      [17,'Al-Isra','الإسراء',111],[18,'Al-Kahf','الكهف',110],[19,'Maryam','مريم',98],[20,'Taha','طه',135],
+      [21,'Al-Anbiya','الأنبياء',112],[22,'Al-Hajj','الحج',78],[23,'Al-Mu'minun','المؤمنون',118],[24,'An-Nur','النور',64],
+      [25,'Al-Furqan','الفرقان',77],[26,'Asy-Syu'ara','الشعراء',227],[27,'An-Naml','النمل',93],[28,'Al-Qasas','القصص',88],
+      [29,'Al-Ankabut','العنكبوت',69],[30,'Ar-Rum','الروم',60],[31,'Luqman','لقمان',34],[32,'As-Sajdah','السجدة',30],
+      [33,'Al-Ahzab','الأحزاب',73],[34,'Saba','سبأ',54],[35,'Fatir','فاطر',45],[36,'Yasin','يس',83],
+      [37,'As-Saffat','الصافات',182],[38,'Sad','ص',88],[39,'Az-Zumar','الزمر',75],[40,'Ghafir','غافر',85],
+      [41,'Fussilat','فصلت',54],[42,'Asy-Syura','الشورى',53],[43,'Az-Zukhruf','الزخرف',89],[44,'Ad-Dukhan','الدخان',59],
+      [45,'Al-Jasiyah','الجاثية',37],[46,'Al-Ahqaf','الأحقاف',35],[47,'Muhammad','محمد',38],[48,'Al-Fath','الفتح',29],
+      [49,'Al-Hujurat','الحجرات',18],[50,'Qaf','ق',45],[51,'Az-Zariyat','الذاريات',60],[52,'At-Tur','الطور',49],
+      [53,'An-Najm','النجم',62],[54,'Al-Qamar','القمر',55],[55,'Ar-Rahman','الرحمن',78],[56,'Al-Waqi'ah','الواقعة',96],
+      [57,'Al-Hadid','الحديد',29],[58,'Al-Mujadilah','المجادلة',22],[59,'Al-Hasyr','الحشر',24],[60,'Al-Mumtahanah','الممتحنة',13],
+      [61,'As-Saff','الصف',14],[62,'Al-Jumu'ah','الجمعة',11],[63,'Al-Munafiqun','المنافقون',11],[64,'At-Taghabun','التغابن',18],
+      [65,'At-Talaq','الطلاق',12],[66,'At-Tahrim','التحريم',12],[67,'Al-Mulk','الملك',30],[68,'Al-Qalam','القلم',52],
+      [69,'Al-Haqqah','الحاقة',52],[70,'Al-Ma'arij','المعارج',44],[71,'Nuh','نوح',28],[72,'Al-Jinn','الجن',28],
+      [73,'Al-Muzzammil','المزمل',20],[74,'Al-Muddassir','المدثر',56],[75,'Al-Qiyamah','القيامة',40],[76,'Al-Insan','الإنسان',31],
+      [77,'Al-Mursalat','المرسلات',50],[78,'An-Naba','النبأ',40],[79,'An-Nazi'at','النازعات',46],[80,'Abasa','عبس',42],
+      [81,'At-Takwir','التكوير',29],[82,'Al-Infitar','الانفطار',19],[83,'Al-Mutaffifin','المطففين',36],[84,'Al-Insyiqaq','الانشقاق',25],
+      [85,'Al-Buruj','البروج',22],[86,'At-Tariq','الطارق',17],[87,'Al-A'la','الأعلى',19],[88,'Al-Ghasyiyah','الغاشية',26],
+      [89,'Al-Fajr','الفجر',30],[90,'Al-Balad','البلد',20],[91,'Asy-Syams','الشمس',15],[92,'Al-Lail','الليل',21],
+      [93,'Ad-Duha','الضحى',11],[94,'Asy-Syarh','الشرح',8],[95,'At-Tin','التين',8],[96,'Al-Alaq','العلق',19],
+      [97,'Al-Qadr','القدر',5],[98,'Al-Bayyinah','البينة',8],[99,'Az-Zalzalah','الزلزلة',8],[100,'Al-Adiyat','العاديات',11],
+      [101,'Al-Qari'ah','القارعة',11],[102,'At-Takasur','التكاثر',8],[103,'Al-Asr','العصر',3],[104,'Al-Humazah','الهمزة',9],
+      [105,'Al-Fil','الفيل',5],[106,'Quraisy','قريش',4],[107,'Al-Ma'un','الماعون',7],[108,'Al-Kausar','الكوثر',3],
+      [109,'Al-Kafirun','الكافرون',6],[110,'An-Nasr','النصر',3],[111,'Al-Lahab','المسد',5],[112,'Al-Ikhlas','الإخلاص',4],
+      [113,'Al-Falaq','الفلق',5],[114,'An-Nas','الناس',6]
+    ];
+
+    const JUZ_STARTS = [
+      [1,1,1],[2,2,142],[3,2,253],[4,3,93],[5,4,24],[6,4,148],[7,5,82],[8,6,111],[9,7,88],[10,8,41],
+      [11,9,93],[12,11,6],[13,12,53],[14,15,1],[15,17,1],[16,18,75],[17,21,1],[18,23,1],[19,25,21],[20,27,56],
+      [21,29,46],[22,33,31],[23,36,28],[24,39,32],[25,41,47],[26,46,1],[27,51,31],[28,58,1],[29,67,1],[30,78,1]
+    ];
+
+    const BULAN_HIJRIAH = [
+      'Muharram','Safar','Rabiul Awal','Rabiul Akhir','Jumadil Awal','Jumadil Akhir',
+      'Rajab','Sya'ban','Ramadhan','Syawal','Dzulqa'dah','Dzulhijjah'
+    ];
+
+    const CHECKLIST_ITEMS = [
+      { id: 'puasa', label: 'Puasa Ramadhan Penuh' },
+      { id: 'subuh', label: 'Sholat Subuh' },
+      { id: 'dzuhur', label: 'Sholat Dzuhur' },
+      { id: 'ashar', label: 'Sholat Ashar' },
+      { id: 'maghrib', label: 'Sholat Maghrib' },
+      { id: 'isya', label: 'Sholat Isya' },
+      { id: 'tarawih', label: 'Sholat Tarawih & Witir' },
+      { id: 'sedekah', label: 'Sedekah / Infaq Harian' }
+    ];
+
+    const NIAT_DOA_LIST = [
+      {
+        title: 'Niat Puasa Ramadhan',
+        arab: 'نَوَيْتُ صَوْمَ غَدٍ عَنْ أَدَاءِ فَرْضِ شَهْرِ رَمَضَانَ هٰذِهِ السَّنَةِ لِلّٰهِ تَعَالَى',
+        latin: 'Nawaitu shauma ghadin ‘an adā’i fardhi syahri Ramadhāna hādzihis sanati lillāhi ta‘ālā.',
+        arti: 'Aku berniat puasa esok hari untuk menunaikan kewajiban bulan Ramadhan tahun ini karena Allah Ta’ala.'
+      },
+      {
+        title: 'Doa Berbuka Puasa',
+        arab: 'ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ',
+        latin: 'Dzahabazh zhama’u wabtallatil ‘urūqu wa tsabatal ajru in syā’allāh.',
+        arti: 'Telah hilang rasa haus, urat-urat telah basah, dan pahala telah ditetapkan insya Allah.'
+      },
+      {
+        title: 'Niat Puasa Senin / Kamis',
+        arab: 'نَوَيْتُ صَوْمَ يَوْمِ الِاثْنَيْنِ / الْخَمِيسِ سُنَّةً لِلّٰهِ تَعَالَى',
+        latin: 'Nawaitu shauma yaumil itsnaini / khamīsi sunnatan lillāhi ta‘ālā.',
+        arti: 'Aku berniat puasa sunnah hari Senin / Kamis karena Allah Ta’ala.'
+      }
+    ];
+
+    // =========================================================================
+    // 3. STATE & STORAGE
+    // =========================================================================
+    const state = {
+      region: JSON.parse(localStorage.getItem('app_region') || 'null') || REGIONS[0],
+      hilalOffset: parseInt(localStorage.getItem('app_hilal_offset') || '0', 10),
+      calViewDate: new Date(),
+      selectedCalDate: new Date(),
+      hijriYears: JSON.parse(localStorage.getItem('app_hijri_years') || '[1447, 1448, 1449]'),
+      activeHijriYear: parseInt(localStorage.getItem('app_active_hijri_year') || '1448', 10),
+      activeRamadhanDay: parseInt(localStorage.getItem('app_active_ramadhan_day') || '1', 10),
+      tasbihCount: parseInt(localStorage.getItem('app_tasbih_count') || '0', 10),
+      tasbihPhrase: localStorage.getItem('app_tasbih_phrase') || 'Subhanallah (سُبْحَانَ اللَّهِ)',
+      tasbihTarget: parseInt(localStorage.getItem('app_tasbih_target') || '33', 10)
+    };
+
+    function showToast(msg) {
+      const el = document.getElementById('toastBox');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.add('hidden'), 2600);
+    }
+
+    // =========================================================================
+    // 4. ASTRONOMICAL PRAYER TIME ENGINE (KEMENAG RI: SUBUH 20°, ISYA 18°, +2m IHTIYAT)
+    // =========================================================================
+    function computePrayerTimes(dateObj, lat, lng, tz) {
+      const year = dateObj.getFullYear();
+      const month = dateObj.getMonth() + 1;
+      const day = dateObj.getDate();
+
+      // Julian Date
+      let y = year, m = month;
+      if (m <= 2) { y -= 1; m += 12; }
+      const A = Math.floor(y / 100);
+      const B = 2 - A + Math.floor(A / 4);
+      const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + B - 1524.5;
+
+      const d = jd - 2451545.0;
+      const g = (357.529 + 0.98560028 * d) % 360;
+      const q = (280.459 + 0.98564736 * d) % 360;
+      const L = (q + 1.915 * Math.sin(g * Math.PI / 180) + 0.020 * Math.sin(2 * g * Math.PI / 180)) % 360;
+      const e = 23.439 - 0.00000036 * d;
+      const RA = Math.atan2(Math.cos(e * Math.PI / 180) * Math.sin(L * Math.PI / 180), Math.cos(L * Math.PI / 180)) * 180 / Math.PI / 15;
+      const decl = Math.asin(Math.sin(e * Math.PI / 180) * Math.sin(L * Math.PI / 180)) * 180 / Math.PI;
+      const EqT = (q / 15) - ((RA + 360) % 24);
+      let eqMin = EqT;
+      if (eqMin > 12) eqMin -= 24;
+      if (eqMin < -12) eqMin += 24;
+
+      const transit = 12 + tz - (lng / 15) - eqMin;
+
+      function hourAngle(angleDeg) {
+        const radLat = lat * Math.PI / 180;
+        const radDecl = decl * Math.PI / 180;
+        const cosH = (Math.sin(angleDeg * Math.PI / 180) - Math.sin(radLat) * Math.sin(radDecl)) / (Math.cos(radLat) * Math.cos(radDecl));
+        if (cosH > 1) return 0;
+        if (cosH < -1) return 12;
+        return Math.acos(cosH) * 180 / Math.PI / 15;
+      }
+
+      const asharAngle = -Math.atan(1 / (1 + Math.tan(Math.abs(lat - decl) * Math.PI / 180))) * 180 / Math.PI;
+
+      const subuhH = transit - hourAngle(-20) + (2 / 60);
+      const terbitH = transit - hourAngle(-0.833) - (2 / 60);
+      const dzuhurH = transit + (2 / 60);
+      const asharH = transit + hourAngle(asharAngle) + (2 / 60);
+      const maghribH = transit + hourAngle(-0.833) + (2 / 60);
+      const isyaH = transit + hourAngle(-18) + (2 / 60);
+      const imsakH = subuhH - (10 / 60);
+
+      function toMin(h) {
+        let mTotal = Math.round(((h + 24) % 24) * 60);
+        if (mTotal >= 1440) mTotal -= 1440;
+        return mTotal;
+      }
+      function fmt(mTotal) {
+        const hh = String(Math.floor(mTotal / 60)).padStart(2, '0');
+        const mm = String(mTotal % 60).padStart(2, '0');
+        return `${hh}:${mm}`;
+      }
+
+      const mins = {
+        imsak: toMin(imsakH),
+        subuh: toMin(subuhH),
+        terbit: toMin(terbitH),
+        dzuhur: toMin(dzuhurH),
+        ashar: toMin(asharH),
+        maghrib: toMin(maghribH),
+        isya: toMin(isyaH)
+      };
+
+      return {
+        mins,
+        str: {
+          imsak: fmt(mins.imsak),
+          subuh: fmt(mins.subuh),
+          terbit: fmt(mins.terbit),
+          dzuhur: fmt(mins.dzuhur),
+          ashar: fmt(mins.ashar),
+          maghrib: fmt(mins.maghrib),
+          isya: fmt(mins.isya)
+        }
+      };
+    }
+
+    // =========================================================================
+    // 5. HIJRI CALENDAR CONVERTER
+    // =========================================================================
+    function getHijriDate(dateObj, offsetDays = 0) {
+      const shifted = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate() + offsetDays);
+      let d = shifted.getDate();
+      let m = shifted.getMonth() + 1;
+      let y = shifted.getFullYear();
+      if (m < 3) { y -= 1; m += 12; }
+      const a = Math.floor(y / 100);
+      const b = 2 - a + Math.floor(a / 4);
+      const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + b - 1524;
+
+      let l = jd - 1948440 + 10632;
+      const n = Math.floor((l - 1) / 10631);
+      l = l - 10631 * n + 354;
+      const j = (Math.floor((10985 - l) / 5316)) * (Math.floor((50 * l) / 17719)) + (Math.floor(l / 5670)) * (Math.floor((43 * l) / 15238));
+      l = l - (Math.floor((30 - j) / 15)) * (Math.floor((17719 * j) / 50)) - (Math.floor(j / 16)) * (Math.floor((15238 * j) / 43)) + 29;
+      const hMonth = Math.floor((24 * l) / 709);
+      const hDay = l - Math.floor((709 * hMonth) / 24);
+      const hYear = 30 * n + j - 30;
+      return {
+        day: hDay,
+        month: hMonth,
+        monthName: BULAN_HIJRIAH[hMonth - 1] || 'Muharram',
+        year: hYear
+      };
+    }
+
+    function getFastingInfo(dateObj, hijri) {
+      const dow = dateObj.getDay();
+      if (hijri.month === 10 && hijri.day === 1) return { label: 'Haram Puasa (Idul Fitri)', type: 'haram' };
+      if (hijri.month === 12 && [10, 11, 12, 13].includes(hijri.day)) return { label: 'Haram Puasa (Idul Adha / Tasyrik)', type: 'haram' };
+      if (hijri.month === 9) return { label: `Puasa Ramadhan Hari ke-${hijri.day}`, type: 'ramadhan' };
+      if (hijri.month === 12 && hijri.day === 9) return { label: 'Puasa Sunnah Arafah', type: 'sunnah' };
+      if (hijri.month === 1 && hijri.day === 10) return { label: 'Puasa Sunnah Asyura', type: 'sunnah' };
+      if ([13, 14, 15].includes(hijri.day)) return { label: 'Puasa Ayyamul Bidh', type: 'ayyamul' };
+      if (dow === 1) return { label: 'Puasa Sunnah Senin', type: 'sunnah' };
+      if (dow === 4) return { label: 'Puasa Sunnah Kamis', type: 'sunnah' };
+      return { label: 'Bukan Jadwal Puasa Khusus', type: 'normal' };
+    }
+
+    // =========================================================================
+    // 6. RENDER DASHBOARD & LIVE CLOCK
+    // =========================================================================
+    function renderDashboard() {
+      const now = new Date();
+      const hijri = getHijriDate(now, state.hilalOffset);
+      const pt = computePrayerTimes(now, state.region.lat, state.region.lng, state.region.tz);
+      const fasting = getFastingInfo(now, hijri);
+
+      document.getElementById('headerLocationLabel').textContent = state.region.name;
+      document.getElementById('masehiDateText').textContent = now.toLocaleDateString('id-ID', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+      document.getElementById('hijriDateText').textContent = `${hijri.day} ${hijri.monthName} ${hijri.year} H`;
+      document.getElementById('fastingStatusBadge').textContent = fasting.label;
+
+      const list = [
+        { key: 'imsak', name: 'Imsak', time: pt.str.imsak, min: pt.mins.imsak },
+        { key: 'subuh', name: 'Subuh', time: pt.str.subuh, min: pt.mins.subuh },
+        { key: 'dzuhur', name: 'Dzuhur', time: pt.str.dzuhur, min: pt.mins.dzuhur },
+        { key: 'ashar', name: 'Ashar', time: pt.str.ashar, min: pt.mins.ashar },
+        { key: 'maghrib', name: 'Maghrib / Buka', time: pt.str.maghrib, min: pt.mins.maghrib },
+        { key: 'isya', name: 'Isya', time: pt.str.isya, min: pt.mins.isya }
+      ];
+
+      const curMin = now.getHours() * 60 + now.getMinutes();
+      let nextItem = list.find(item => item.min > curMin) || list[0];
+
+      const grid = document.getElementById('prayerCardsGrid');
+      grid.innerHTML = list.map(item => {
+        const isNext = item.key === nextItem.key;
+        return `
+          <div class="rounded-2xl p-4 border transition ${isNext
+            ? 'bg-emerald-600 text-white border-emerald-500 shadow-md'
+            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'}">
+            <p class="text-xs font-semibold ${isNext ? 'text-emerald-100' : 'text-slate-400'}">${item.name}</p>
+            <p class="text-2xl font-extrabold font-mono mt-1">${item.time}</p>
+            ${isNext ? '<span class="inline-block mt-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20">Berikutnya</span>' : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateLiveClock() {
+      const now = new Date();
+      document.getElementById('liveClockText').textContent = now.toTimeString().slice(0, 8);
+      const pt = computePrayerTimes(now, state.region.lat, state.region.lng, state.region.tz);
+      const list = [
+        { name: 'Imsak', min: pt.mins.imsak },
+        { name: 'Subuh', min: pt.mins.subuh },
+        { name: 'Dzuhur', min: pt.mins.dzuhur },
+        { name: 'Ashar', min: pt.mins.ashar },
+        { name: 'Maghrib (Buka)', min: pt.mins.maghrib },
+        { name: 'Isya', min: pt.mins.isya }
+      ];
+      const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      let target = list.find(i => i.min * 60 > nowSec);
+      let diffSec = 0;
+      if (target) {
+        diffSec = target.min * 60 - nowSec;
+      } else {
+        target = list[0];
+        diffSec = (24 * 3600 - nowSec) + target.min * 60;
+      }
+      const hh = String(Math.floor(diffSec / 3600)).padStart(2, '0');
+      const mm = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
+      const ss = String(diffSec % 60).padStart(2, '0');
+      document.getElementById('nextPrayerName').textContent = target.name;
+      document.getElementById('nextPrayerCountdown').textContent = `${hh}:${mm}:${ss}`;
+    }
+
+    function renderNiatDoa() {
+      const container = document.getElementById('niatDoaContainer');
+      container.innerHTML = NIAT_DOA_LIST.map(item => `
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-2">
+          <p class="text-xs font-bold text-emerald-700 dark:text-emerald-400">${item.title}</p>
+          <p class="font-arabic text-xl text-right leading-loose text-slate-900 dark:text-white">${item.arab}</p>
+          <p class="text-[11px] italic text-slate-600 dark:text-slate-300">${item.latin}</p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">${item.arti}</p>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // 7. REGION SELECTORS & GPS
+    // =========================================================================
+    function populateRegionDropdowns(filterText = '') {
+      const q = filterText.trim().toLowerCase();
+      const filtered = REGIONS.filter(r => r.name.toLowerCase().includes(q));
+      const listToUse = filtered.length ? filtered : REGIONS;
+
+      ['regionSelect', 'regionSelectMobile'].forEach(selId => {
+        const sel = document.getElementById(selId);
+        if (!sel) return;
+        sel.innerHTML = '';
+        // Ensure custom/GPS region is present
+        if (!listToUse.some(r => r.name === state.region.name)) {
+          const optCustom = document.createElement('option');
+          optCustom.value = JSON.stringify(state.region);
+          optCustom.textContent = `📍 ${state.region.name}`;
+          optCustom.selected = true;
+          sel.appendChild(optCustom);
+        }
+        listToUse.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = JSON.stringify(r);
+          opt.textContent = r.name;
+          if (r.name === state.region.name) opt.selected = true;
+          sel.appendChild(opt);
+        });
+      });
+    }
+
+    function applyRegion(regionObj) {
+      state.region = regionObj;
+      localStorage.setItem('app_region', JSON.stringify(regionObj));
+      populateRegionDropdowns();
+      renderDashboard();
+      renderCalendar();
+      renderImsakiyah();
+      showToast(`Wilayah diubah ke ${regionObj.name}`);
+    }
+
+    function detectGPS() {
+      if (!navigator.geolocation) {
+        showToast('Browser tidak mendukung GPS');
+        return;
+      }
+      showToast('Mendeteksi koordinat GPS...');
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = parseFloat(pos.coords.latitude.toFixed(4));
+          const lng = parseFloat(pos.coords.longitude.toFixed(4));
+          const tz = lng >= 134 ? 9 : (lng >= 115 ? 8 : 7);
+          applyRegion({ name: `Lokasi GPS (${lat}, ${lng})`, lat, lng, tz });
+        },
+        () => showToast('Gagal mengambil GPS. Pastikan izin lokasi aktif.'),
+        { timeout: 8000 }
+      );
+    }
+
+    // =========================================================================
+    // 8. CALENDAR HIJRIAH
+    // =========================================================================
+    function renderCalendar() {
+      const year = state.calViewDate.getFullYear();
+      const month = state.calViewDate.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startWeekday = firstDay.getDay();
+
+      const hStart = getHijriDate(firstDay, state.hilalOffset);
+      const hEnd = getHijriDate(lastDay, state.hilalOffset);
+      document.getElementById('calendarMonthTitle').textContent = firstDay.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      document.getElementById('calendarHijriSubtitle').textContent = `${hStart.monthName} ${hStart.year} H – ${hEnd.monthName} ${hEnd.year} H`;
+
+      const grid = document.getElementById('calendarDaysGrid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < startWeekday; i++) {
+        grid.innerHTML += `<div class="p-2 rounded-xl bg-slate-50/40 dark:bg-slate-900/30"></div>`;
+      }
+
+      const today = new Date();
+      for (let d = 1; d <= lastDay.getDate(); d++) {
+        const curDate = new Date(year, month, d);
+        const hijri = getHijriDate(curDate, state.hilalOffset);
+        const fasting = getFastingInfo(curDate, hijri);
+        const isToday = curDate.toDateString() === today.toDateString();
+        const isSelected = curDate.toDateString() === state.selectedCalDate.toDateString();
+
+        let dotHtml = '';
+        if (fasting.type === 'ramadhan') dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>';
+        else if (fasting.type === 'sunnah') dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>';
+        else if (fasting.type === 'ayyamul') dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `p-2 rounded-xl border text-left transition flex flex-col justify-between min-h-[58px] ${
+          isSelected
+            ? 'border-emerald-500 bg-emerald-500/15'
+            : isToday
+              ? 'border-amber-400 bg-amber-500/10'
+              : 'border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+        }`;
+        btn.innerHTML = `
+          <div class="flex items-center justify-between w-full">
+            <span class="text-xs font-extrabold">${d}</span>
+            ${dotHtml}
+          </div>
+          <span class="text-[10px] text-slate-400 mt-1">${hijri.day} ${hijri.monthName.slice(0, 3)}</span>
+        `;
+        btn.addEventListener('click', () => {
+          state.selectedCalDate = curDate;
+          renderCalendar();
+          renderSelectedCalDetail();
+        });
+        grid.appendChild(btn);
+      }
+      renderSelectedCalDetail();
+    }
+
+    function renderSelectedCalDetail() {
+      const d = state.selectedCalDate;
+      const hijri = getHijriDate(d, state.hilalOffset);
+      const pt = computePrayerTimes(d, state.region.lat, state.region.lng, state.region.tz);
+      const fasting = getFastingInfo(d, hijri);
+      document.getElementById('selectedDateDetailText').innerHTML = `
+        <b>${d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</b>
+        (${hijri.day} ${hijri.monthName} ${hijri.year} H) &bull;
+        <span class="text-emerald-600 dark:text-emerald-400 font-semibold">${fasting.label}</span><br/>
+        <span class="inline-block mt-1.5 font-mono text-[11px]">
+          Imsak ${pt.str.imsak} | Subuh ${pt.str.subuh} | Dzuhur ${pt.str.dzuhur} | Ashar ${pt.str.ashar} | Maghrib ${pt.str.maghrib} | Isya ${pt.str.isya}
+        </span>
+      `;
+    }
+
+    // =========================================================================
+    // 9. BUKU RAMADHAN SELAMANYA + TADARUS AL-QUR'AN
+    // =========================================================================
+    function getRamadhanYearData(yearH) {
+      return JSON.parse(localStorage.getItem(`buku_ramadhan_${yearH}`) || '{}');
+    }
+    function saveRamadhanYearData(yearH, data) {
+      localStorage.setItem(`buku_ramadhan_${yearH}`, JSON.stringify(data));
+    }
+
+    function populateHijriYears() {
+      const sel = document.getElementById('hijriYearSelect');
+      sel.innerHTML = state.hijriYears.sort((a, b) => a - b).map(y =>
+        `<option value="${y}" ${y === state.activeHijriYear ? 'selected' : ''}>Ramadhan ${y} H</option>`
+      ).join('');
+    }
+
+    function populateTadarusSelectors() {
+      const juzSel = document.getElementById('tadarusJuzSelect');
+      juzSel.innerHTML = `<option value="all">Semua Juz (1–30)</option>` +
+        JUZ_STARTS.map(j => {
+          const s = SURAHS[j[1] - 1];
+          return `<option value="${j[0]}">Juz ${j[0]} (${s[1]} : ${j[2]})</option>`;
+        }).join('');
+      filterSurahsByJuz('all');
+    }
+
+    function filterSurahsByJuz(juzVal) {
+      const surahSel = document.getElementById('tadarusSurahSelect');
+      let list = SURAHS;
+      let defaultStart = 1;
+      if (juzVal !== 'all') {
+        const jIdx = parseInt(juzVal, 10) - 1;
+        const startSurah = JUZ_STARTS[jIdx][1];
+        defaultStart = JUZ_STARTS[jIdx][2];
+        const endSurah = jIdx < 29 ? JUZ_STARTS[jIdx + 1][1] : 114;
+        list = SURAHS.filter(s => s[0] >= startSurah && s[0] <= endSurah);
+      }
+      surahSel.innerHTML = list.map(s =>
+        `<option value="${s[0]}">${s[0]}. ${s[1]} (${s[2]}) - ${s[3]} Ayat</option>`
+      ).join('');
+      onSurahChanged(defaultStart);
+    }
+
+    function onSurahChanged(customStart = null) {
+      const num = parseInt(document.getElementById('tadarusSurahSelect').value || '1', 10);
+      const s = SURAHS[num - 1] || SURAHS[0];
+      const startEl = document.getElementById('tadarusAyatStart');
+      const endEl = document.getElementById('tadarusAyatEnd');
+      startEl.max = s[3];
+      endEl.max = s[3];
+      const st = customStart ? Math.min(customStart, s[3]) : 1;
+      startEl.value = st;
+      endEl.value = Math.min(st + 6, s[3]);
+      document.getElementById('tadarusSurahInfo').textContent = `${s[0]}. ${s[1]} (${s[2]}) • Total ${s[3]} Ayat`;
+    }
+
+    function renderRamadhanSection() {
+      populateHijriYears();
+      const yearData = getRamadhanYearData(state.activeHijriYear);
+      const dayKey = `day_${state.activeRamadhanDay}`;
+      const dayRecord = yearData[dayKey] || { checks: {}, tadarus: [], note: '' };
+
+      // Day Pills
+      const pills = document.getElementById('ramadhanDayPills');
+      pills.innerHTML = '';
+      for (let d = 1; d <= 30; d++) {
+        const rec = yearData[`day_${d}`] || {};
+        const count = Object.values(rec.checks || {}).filter(Boolean).length;
+        const active = d === state.activeRamadhanDay;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `py-2 rounded-xl text-xs font-bold border transition ${
+          active
+            ? 'bg-emerald-600 text-white border-emerald-600'
+            : count > 0
+              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+              : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+        }`;
+        btn.textContent = d;
+        btn.addEventListener('click', () => {
+          state.activeRamadhanDay = d;
+          localStorage.setItem('app_active_ramadhan_day', String(d));
+          renderRamadhanSection();
+        });
+        pills.appendChild(btn);
+      }
+
+      document.getElementById('ramadhanActiveDayTitle').textContent = `Hari ke-${state.activeRamadhanDay} Ramadhan ${state.activeHijriYear} H`;
+      const checkedCount = Object.values(dayRecord.checks || {}).filter(Boolean).length;
+      document.getElementById('ramadhanDayScoreBadge').textContent = `${checkedCount} / ${CHECKLIST_ITEMS.length} Amalan`;
+
+      // Checklist
+      const chkGrid = document.getElementById('ramadhanChecklistGrid');
+      chkGrid.innerHTML = CHECKLIST_ITEMS.map(item => {
+        const isChecked = !!(dayRecord.checks && dayRecord.checks[item.id]);
+        return `
+          <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
+            isChecked
+              ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-800 dark:text-emerald-200'
+              : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-800'
+          }">
+            <input type="checkbox" data-chk-id="${item.id}" ${isChecked ? 'checked' : ''} class="w-4 h-4 accent-emerald-600 rounded" />
+            <span class="text-xs font-semibold">${item.label}</span>
+          </label>
+        `;
+      }).join('');
+
+      chkGrid.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          const data = getRamadhanYearData(state.activeHijriYear);
+          if (!data[dayKey]) data[dayKey] = { checks: {}, tadarus: [], note: '' };
+          if (!data[dayKey].checks) data[dayKey].checks = {};
+          data[dayKey].checks[e.target.dataset.chkId] = e.target.checked;
+          saveRamadhanYearData(state.activeHijriYear, data);
+          renderRamadhanSection();
+        });
+      });
+
+      // Tadarus Logs
+      const logList = document.getElementById('tadarusLogList');
+      const logs = dayRecord.tadarus || [];
+      if (!logs.length) {
+        logList.innerHTML = `<p class="text-[11px] text-slate-400 italic">Belum ada catatan tadarus untuk hari ke-${state.activeRamadhanDay}.</p>`;
+      } else {
+        logList.innerHTML = logs.map((lg, idx) => `
+          <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs">
+            <span>📖 <b>${lg.surahName}</b> : Ayat ${lg.start} – ${lg.end}</span>
+            <button type="button" data-del-tadarus="${idx}" class="text-rose-500 hover:text-rose-400 font-bold px-2">Hapus</button>
+          </div>
+        `).join('');
+        logList.querySelectorAll('[data-del-tadarus]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const data = getRamadhanYearData(state.activeHijriYear);
+            data[dayKey].tadarus.splice(parseInt(btn.dataset.delTadarus, 10), 1);
+            saveRamadhanYearData(state.activeHijriYear, data);
+            renderRamadhanSection();
+          });
+        });
+      }
+
+      // Note
+      const noteEl = document.getElementById('ramadhanNoteInput');
+      noteEl.value = dayRecord.note || '';
+
+      // Recap Table
+      const tbody = document.getElementById('ramadhanRecapTableBody');
+      let rowsHtml = '';
+      for (let d = 1; d <= 30; d++) {
+        const rec = yearData[`day_${d}`] || {};
+        const cCount = Object.values(rec.checks || {}).filter(Boolean).length;
+        const tadStr = (rec.tadarus || []).map(t => `${t.surahName} (${t.start}-${t.end})`).join(', ') || '-';
+        rowsHtml += `
+          <tr class="border-b border-slate-100 dark:border-slate-800/70">
+            <td class="py-2 px-2 font-bold">Hari ${d}</td>
+            <td class="py-2 px-2">${cCount}/${CHECKLIST_ITEMS.length}</td>
+            <td class="py-2 px-2">${tadStr}</td>
+            <td class="py-2 px-2 text-slate-400">${rec.note || '-'}</td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = rowsHtml;
+    }
+
+    // =========================================================================
+    // 10. TASBIH & IMSAKIYAH 1 BULAN
+    // =========================================================================
+    function renderTasbih() {
+      document.getElementById('tasbihActivePhrase').textContent = state.tasbihPhrase;
+      document.getElementById('tasbihCounterDisplay').textContent = state.tasbihCount;
+      document.getElementById('tasbihProgressText').textContent = `${state.tasbihCount} / ${state.tasbihTarget} hitungan`;
+    }
+
+    function renderImsakiyah() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = now.getMonth();
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      document.getElementById('imsakiyahSubtitle').textContent = `${state.region.name} • ${now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}`;
+
+      const tbody = document.getElementById('imsakiyahTableBody');
+      let html = '';
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dt = new Date(y, m, d);
+        const h = getHijriDate(dt, state.hilalOffset);
+        const pt = computePrayerTimes(dt, state.region.lat, state.region.lng, state.region.tz);
+        const isToday = d === now.getDate();
+        html += `
+          <tr class="border-b border-slate-100 dark:border-slate-800/70 ${isToday ? 'bg-emerald-500/15 font-bold' : ''}">
+            <td class="py-2 px-2">${d} ${dt.toLocaleDateString('id-ID', { month: 'short' })}</td>
+            <td class="py-2 px-2">${h.day} ${h.monthName.slice(0, 3)}</td>
+            <td class="py-2 px-2 font-mono text-amber-600 dark:text-amber-400">${pt.str.imsak}</td>
+            <td class="py-2 px-2 font-mono">${pt.str.subuh}</td>
+            <td class="py-2 px-2 font-mono">${pt.str.dzuhur}</td>
+            <td class="py-2 px-2 font-mono">${pt.str.ashar}</td>
+            <td class="py-2 px-2 font-mono text-emerald-600 dark:text-emerald-400">${pt.str.maghrib}</td>
+            <td class="py-2 px-2 font-mono">${pt.str.isya}</td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = html;
+    }
+
+    // =========================================================================
+    // 11. NAVIGATION & EVENT BINDINGS
+    // =========================================================================
+    function switchTab(tabName) {
+      document.querySelectorAll('.app-section').forEach(sec => sec.classList.add('hidden'));
+      const target = document.getElementById(`section-${tabName}`);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const active = btn.dataset.nav === tabName;
+        if (btn.closest('aside')) {
+          btn.className = active
+            ? 'nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold bg-emerald-600 text-white'
+            : 'nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800';
+        } else {
+          btn.className = active
+            ? 'nav-btn flex flex-col items-center py-1 rounded-xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400'
+            : 'nav-btn flex flex-col items-center py-1 rounded-xl text-[11px] font-semibold text-slate-500 dark:text-slate-400';
+        }
+      });
+    }
+
+    function bindEvents() {
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.nav));
+      });
+
+      document.getElementById('btnToggleTheme').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('app_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      });
+
+      // Native Install Button
+      document.getElementById('btnInstallApp').addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const { outcome } = await deferredInstallPrompt.userChoice;
+          if (outcome === 'accepted') showToast('Aplikasi berhasil diinstal!');
+          deferredInstallPrompt = null;
+        } else {
+          document.getElementById('installHelpModal').classList.remove('hidden');
+        }
+      });
+
+      // Install Help Modal
+      document.getElementById('btnOpenInstallHelp').addEventListener('click', () => {
+        document.getElementById('installHelpModal').classList.remove('hidden');
+      });
+      ['btnCloseInstallHelp', 'btnOkInstallHelp'].forEach(id => {
+        document.getElementById(id).addEventListener('click', () => {
+          document.getElementById('installHelpModal').classList.add('hidden');
+        });
+      });
+
+      // Region Search & Select
+      ['regionSearchInput', 'regionSearchInputMobile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', (e) => populateRegionDropdowns(e.target.value));
+      });
+      ['regionSelect', 'regionSelectMobile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', (e) => applyRegion(JSON.parse(e.target.value)));
+      });
+      ['btnDetectGPS', 'btnDetectGPSMobile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', detectGPS);
+      });
+
+      // Manual Coordinates Modal
+      ['btnOpenManualCoord', 'btnOpenManualCoordMobile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', () => {
+          document.getElementById('manualCityName').value = state.region.name;
+          document.getElementById('manualLat').value = state.region.lat;
+          document.getElementById('manualLng').value = state.region.lng;
+          document.getElementById('manualTz').value = String(state.region.tz);
+          document.getElementById('manualCoordModal').classList.remove('hidden');
+        });
+      });
+      ['btnCloseManualModal', 'btnCancelManualModal'].forEach(id => {
+        document.getElementById(id).addEventListener('click', () => {
+          document.getElementById('manualCoordModal').classList.add('hidden');
+        });
+      });
+      document.getElementById('btnSaveManualCoord').addEventListener('click', () => {
+        const name = document.getElementById('manualCityName').value.trim() || 'Daerah Kustom';
+        const lat = parseFloat(document.getElementById('manualLat').value);
+        const lng = parseFloat(document.getElementById('manualLng').value);
+        const tz = parseInt(document.getElementById('manualTz').value, 10);
+        if (isNaN(lat) || isNaN(lng)) {
+          showToast('Latitude dan Longitude harus berupa angka valid');
+          return;
+        }
+        document.getElementById('manualCoordModal').classList.add('hidden');
+        applyRegion({ name, lat, lng, tz });
+      });
+
+      // Hilal Offset
+      const hilalSel = document.getElementById('hilalOffsetSelect');
+      hilalSel.value = String(state.hilalOffset);
+      hilalSel.addEventListener('change', (e) => {
+        state.hilalOffset = parseInt(e.target.value, 10);
+        localStorage.setItem('app_hilal_offset', String(state.hilalOffset));
+        renderDashboard();
+        renderCalendar();
+        renderImsakiyah();
+      });
+
+      // Calendar Navigation
+      document.getElementById('btnPrevMonth').addEventListener('click', () => {
+        state.calViewDate = new Date(state.calViewDate.getFullYear(), state.calViewDate.getMonth() - 1, 1);
+        renderCalendar();
+      });
+      document.getElementById('btnNextMonth').addEventListener('click', () => {
+        state.calViewDate = new Date(state.calViewDate.getFullYear(), state.calViewDate.getMonth() + 1, 1);
+        renderCalendar();
+      });
+      document.getElementById('btnTodayMonth').addEventListener('click', () => {
+        state.calViewDate = new Date();
+        state.selectedCalDate = new Date();
+        renderCalendar();
+      });
+
+      // Buku Ramadhan Events
+      document.getElementById('hijriYearSelect').addEventListener('change', (e) => {
+        state.activeHijriYear = parseInt(e.target.value, 10);
+        localStorage.setItem('app_active_hijri_year', String(state.activeHijriYear));
+        renderRamadhanSection();
+      });
+      document.getElementById('btnAddHijriYear').addEventListener('click', () => {
+        const nextY = Math.max(...state.hijriYears) + 1;
+        state.hijriYears.push(nextY);
+        state.activeHijriYear = nextY;
+        localStorage.setItem('app_hijri_years', JSON.stringify(state.hijriYears));
+        localStorage.setItem('app_active_hijri_year', String(nextY));
+        renderRamadhanSection();
+        showToast(`Tahun Ramadhan ${nextY} H ditambahkan!`);
+      });
+
+      document.getElementById('tadarusJuzSelect').addEventListener('change', (e) => filterSurahsByJuz(e.target.value));
+      document.getElementById('tadarusSurahSelect').addEventListener('change', () => onSurahChanged());
+
+      document.getElementById('btnAddTadarusLog').addEventListener('click', () => {
+        const sNum = parseInt(document.getElementById('tadarusSurahSelect').value || '1', 10);
+        const s = SURAHS[sNum - 1] || SURAHS[0];
+        let start = Math.max(1, parseInt(document.getElementById('tadarusAyatStart').value || '1', 10));
+        let end = Math.min(s[3], Math.max(start, parseInt(document.getElementById('tadarusAyatEnd').value || String(start), 10)));
+
+        const dayKey = `day_${state.activeRamadhanDay}`;
+        const data = getRamadhanYearData(state.activeHijriYear);
+        if (!data[dayKey]) data[dayKey] = { checks: {}, tadarus: [], note: '' };
+        if (!data[dayKey].tadarus) data[dayKey].tadarus = [];
+        data[dayKey].tadarus.push({ surahNum: s[0], surahName: s[1], start, end });
+        saveRamadhanYearData(state.activeHijriYear, data);
+
+        // Advance next start ayat automatically
+        if (end < s[3]) {
+          document.getElementById('tadarusAyatStart').value = end + 1;
+          document.getElementById('tadarusAyatEnd').value = Math.min(end + 7, s[3]);
+        }
+        renderRamadhanSection();
+        showToast(`Tadarus ${s[1]} ayat ${start}-${end} dicatat`);
+      });
+
+      document.getElementById('ramadhanNoteInput').addEventListener('input', (e) => {
+        const dayKey = `day_${state.activeRamadhanDay}`;
+        const data = getRamadhanYearData(state.activeHijriYear);
+        if (!data[dayKey]) data[dayKey] = { checks: {}, tadarus: [], note: '' };
+        data[dayKey].note = e.target.value;
+        saveRamadhanYearData(state.activeHijriYear, data);
+      });
+
+      document.getElementById('btnExportBackup').addEventListener('click', () => {
+        const payload = { hijriYears: state.hijriYears, records: {} };
+        state.hijriYears.forEach(y => { payload.records[y] = getRamadhanYearData(y); });
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Backup_Buku_Ramadhan_${state.activeHijriYear}H.json`;
+        a.click();
+      });
+
+      document.getElementById('inputImportBackup').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            if (parsed.records) {
+              Object.keys(parsed.records).forEach(y => {
+                const yr = parseInt(y, 10);
+                if (!state.hijriYears.includes(yr)) state.hijriYears.push(yr);
+                saveRamadhanYearData(yr, parsed.records[y]);
+              });
+              localStorage.setItem('app_hijri_years', JSON.stringify(state.hijriYears));
+              renderRamadhanSection();
+              showToast('Backup Buku Ramadhan berhasil dipulihkan!');
+            }
+          } catch (err) {
+            showToast('Format file backup tidak valid');
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById('btnCopyRecap').addEventListener('click', () => {
+        const yearData = getRamadhanYearData(state.activeHijriYear);
+        let text = `REKAP BUKU RAMADHAN ${state.activeHijriYear} H\n`;
+        for (let d = 1; d <= 30; d++) {
+          const rec = yearData[`day_${d}`] || {};
+          const cCount = Object.values(rec.checks || {}).filter(Boolean).length;
+          const tad = (rec.tadarus || []).map(t => `${t.surahName} ${t.start}-${t.end}`).join(', ');
+          if (cCount > 0 || tad || rec.note) {
+            text += `Hari ${d}: ${cCount}/8 amalan${tad ? ' | Tadarus: ' + tad : ''}${rec.note ? ' | Catatan: ' + rec.note : ''}\n`;
+          }
+        }
+        navigator.clipboard?.writeText(text);
+        showToast('Rekap disalin ke clipboard!');
+      });
+
+      // Tasbih Events
+      document.getElementById('tasbihPhraseSelect').addEventListener('change', (e) => {
+        state.tasbihPhrase = e.target.value;
+        localStorage.setItem('app_tasbih_phrase', state.tasbihPhrase);
+        renderTasbih();
+      });
+      document.getElementById('tasbihTargetSelect').addEventListener('change', (e) => {
+        state.tasbihTarget = parseInt(e.target.value, 10);
+        localStorage.setItem('app_tasbih_target', String(state.tasbihTarget));
+        renderTasbih();
+      });
+      document.getElementById('btnTasbihIncrement').addEventListener('click', () => {
+        state.tasbihCount += 1;
+        localStorage.setItem('app_tasbih_count', String(state.tasbihCount));
+        if (navigator.vibrate) navigator.vibrate(state.tasbihCount === state.tasbihTarget ? [80, 50, 80] : 20);
+        renderTasbih();
+      });
+      document.getElementById('btnTasbihReset').addEventListener('click', () => {
+        state.tasbihCount = 0;
+        localStorage.setItem('app_tasbih_count', '0');
+        renderTasbih();
+      });
+
+      document.getElementById('btnPrintImsakiyah').addEventListener('click', () => window.print());
+    }
+
+    // INIT APP
+    document.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('app_theme') === 'light') {
+        document.documentElement.classList.remove('dark');
+      }
+      populateRegionDropdowns();
+      populateTadarusSelectors();
+      renderDashboard();
+      updateLiveClock();
+      renderNiatDoa();
+      renderCalendar();
+      renderRamadhanSection();
+      renderTasbih();
+      renderImsakiyah();
+      bindEvents();
+      setInterval(updateLiveClock, 1000);
+    });
+  </script>
+</body>
+</html>
